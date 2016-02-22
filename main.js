@@ -5,6 +5,8 @@ const ctx = canvas.getContext("2d")
 
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
+let osc = audioCtx.createOscillator();
+let timeout = null;
 
 const DELTA = 0.01
 const TONE_DELTA = 0.3
@@ -38,7 +40,6 @@ const fns = [
     ["f(x) = |x|", (x) => Math.abs(x)],
     ["f(x) = 5*sin(x)", (x) => 5*Math.sin(x)],
     ["f(x) = tan(x/2)", (x) => Math.tan(x/2)],
-
 ];
 
 function currentFn(x) {
@@ -155,14 +156,16 @@ function duration() {
 
 function playSound() {
     if (state.isPlaying) {
-        return;
+        osc.stop(audioCtx.currentTime)
+
+        // Clear the timeout so we don't accidentally claim we're not playing
+        clearTimeout(timeout)
     }
 
     setState({ isPlaying: true })
 
-    const osc = audioCtx.createOscillator()
+    osc = audioCtx.createOscillator()
     const gain = audioCtx.createGain()
-
     gain.gain.value = state.volume
 
     const KEYS = 88
@@ -191,7 +194,7 @@ function playSound() {
     osc.stop(audioCtx.currentTime + duration())
 
     // Change the state that we're not playing anymore
-    setTimeout(function() {
+    timeout = setTimeout(function() {
         setState({ isPlaying: false })
     }, duration() * 1000)
 }
@@ -202,24 +205,32 @@ document.addEventListener("keydown", function(e) {
     // P
     if (e.keyCode === 80) {
         playSound()
-    } else if (e.keyCode === 37) {
+    }
+
+    // Left
+    if (e.keyCode === 37) {
         setState({
             cursorX: state.cursorX - state.cursorDelta,
         })
-    } else if (e.keyCode === 39) {
+    }
+
+    // Right
+    if (e.keyCode === 39) {
         setState({
             cursorX: state.cursorX + state.cursorDelta,
         })
+    }
 
     // W
-    } else if (e.keyCode === 87) {
+    if (e.keyCode === 87) {
         setState({
             speed: state.speed * 2
         })
         playSound()
+    }
 
     // Q
-    } else if (e.keyCode === 81) {
+    if (e.keyCode === 81) {
         setState({
             speed: state.speed / 2
         })
