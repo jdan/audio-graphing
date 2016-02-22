@@ -33,7 +33,7 @@ function translatePoint(x, y) {
 const fns = [
     ["f(x) = x", (x) => x],
     ["f(x) = |x|", (x) => Math.abs(x)],
-    ["f(x) = x^2/10", (x) => x*x/10]
+    ["f(x) = x^2/5", (x) => x*x/5],
 ];
 
 function currentFn(x) {
@@ -129,7 +129,7 @@ const state = {
     isPlaying: false,
 
     volume: 0.2,
-    duration: 3,
+    speed: 1,
 
     currentFnIndex: 0,
 }
@@ -144,16 +144,21 @@ function setState(newState) {
     draw()
 }
 
+function duration() {
+    return (X_MAX - X_MIN) / (state.speed * 4)
+}
+
 function playSound() {
+    if (state.isPlaying) {
+        return;
+    }
+
     setState({ isPlaying: true })
 
     const osc = audioCtx.createOscillator()
     const gain = audioCtx.createGain()
 
-    const duration = state.duration
-    const volume = state.volume
-
-    gain.gain.value = volume
+    gain.gain.value = state.volume
 
     const TONE_DELTA = 0.8;
     for (let x = X_MIN; x <= X_MAX; x += TONE_DELTA) {
@@ -170,7 +175,7 @@ function playSound() {
             freq = Math.pow(2, (key - 49) / 12) * 440
         }
 
-        const time = (x - X_MIN) / (X_MAX - X_MIN) * duration
+        const time = (x - X_MIN) / (X_MAX - X_MIN) * duration()
         osc.frequency.setValueAtTime(freq, audioCtx.currentTime + time)
     }
 
@@ -179,19 +184,19 @@ function playSound() {
 
     // Play the source
     osc.start(audioCtx.currentTime)
-    osc.stop(audioCtx.currentTime + duration)
+    osc.stop(audioCtx.currentTime + duration())
 
     // Change the state that we're not playing anymore
     setTimeout(function() {
         setState({ isPlaying: false })
-    }, duration * 1000)
+    }, duration() * 1000)
 }
 
 document.addEventListener("keydown", function(e) {
+    console.log(e.keyCode)
+
     if (e.keyCode === 32) {
-        if (!state.isPlaying) {
-            playSound()
-        }
+        playSound()
     } else if (e.keyCode === 37) {
         setState({
             cursorX: state.cursorX - state.cursorDelta,
@@ -200,6 +205,20 @@ document.addEventListener("keydown", function(e) {
         setState({
             cursorX: state.cursorX + state.cursorDelta,
         })
+
+    // W
+    } else if (e.keyCode === 87) {
+        setState({
+            speed: state.speed * 2
+        })
+        playSound()
+
+    // Q
+    } else if (e.keyCode === 81) {
+        setState({
+            speed: state.speed / 2
+        })
+        playSound()
     }
 })
 
@@ -229,6 +248,8 @@ function draw() {
     } else {
         cursorInfoDisplay.classList.add("hidden")
     }
+
+    document.getElementById("speed").innerText = state.speed
 }
 
 draw()
