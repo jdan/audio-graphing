@@ -7,6 +7,7 @@ const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
 
 const DELTA = 0.01
+const TONE_DELTA = 0.3
 const CANVAS_WIDTH = canvas.width
 const CANVAS_HEIGHT = canvas.height
 
@@ -32,8 +33,12 @@ function translatePoint(x, y) {
 
 const fns = [
     ["f(x) = x", (x) => x],
+    ["f(x) = x^2/10", (x) => x*x/10],
+    ["f(x) = x^3/12 - 31x/12 + 5/2", (x) => x*x*x/12 - 31*x/12 + 5/2],
     ["f(x) = |x|", (x) => Math.abs(x)],
-    ["f(x) = x^2/5", (x) => x*x/5],
+    ["f(x) = 5*sin(x)", (x) => 5*Math.sin(x)],
+    ["f(x) = tan(x/2)", (x) => Math.tan(x/2)],
+
 ];
 
 function currentFn(x) {
@@ -121,7 +126,7 @@ function drawEquation() {
 
 const state = {
     cursorEnabled: true,
-    cursorDelta: 1,
+    cursorDelta: 0.25,
 
     // Find something on screen?
     cursorX: 0,
@@ -145,7 +150,7 @@ function setState(newState) {
 }
 
 function duration() {
-    return (X_MAX - X_MIN) / (state.speed * 4)
+    return (X_MAX - X_MIN) / (state.speed * 8)
 }
 
 function playSound() {
@@ -160,9 +165,8 @@ function playSound() {
 
     gain.gain.value = state.volume
 
-    const TONE_DELTA = 0.8;
+    const KEYS = 88
     for (let x = X_MIN; x <= X_MAX; x += TONE_DELTA) {
-        const KEYS = 88
         const value = currentFn(x)
 
         // Map to a key
@@ -195,7 +199,8 @@ function playSound() {
 document.addEventListener("keydown", function(e) {
     console.log(e.keyCode)
 
-    if (e.keyCode === 32) {
+    // P
+    if (e.keyCode === 80) {
         playSound()
     } else if (e.keyCode === 37) {
         setState({
