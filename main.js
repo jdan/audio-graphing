@@ -30,9 +30,7 @@ function translatePoint(x, y) {
     }
 }
 
-let fn = (x) => x * x / 10 - 2
-
-fn = (x) => x / 3 - 2
+let fn = (x) => x
 
 function drawVerticalGrid() {
     for (let i = X_MIN; i <= X_MAX; i += GRID_SIZE) {
@@ -108,7 +106,7 @@ const state = {
     isPlaying: false,
 
     volume: 0.2,
-    duration: 0.5,
+    duration: 2,
 }
 
 function setState(newState) {
@@ -121,24 +119,45 @@ function setState(newState) {
     draw()
 }
 
-function playSound() {
+function playSound(fn) {
     setState({ isPlaying: true })
-
-    const duration = state.duration
-    const volume = state.volume
 
     const osc = audioCtx.createOscillator()
     const gain = audioCtx.createGain()
 
-    gain.gain.value = volume
-    osc.frequency.value = 440
+    const duration = state.duration
+    const volume = state.volume
 
-    osc.start(audioCtx.currentTime)
-    osc.stop(audioCtx.currentTime + duration)
+    gain.gain.value = volume
+
+    let waveArray = new Float32Array(Math.round((X_MAX - X_MIN) / DELTA));
+    for (let i = 0, x = X_MIN; x <= X_MAX; x += DELTA, i++) {
+        const KEYS = 88
+        const value = fn(x)
+
+        // Map to a key
+        const key = (value - Y_MIN) / (Y_MAX - Y_MIN) * KEYS + 1
+
+        let freq;
+        if (key > KEYS) {
+            freq = 0
+        } else {
+            freq = Math.pow(2, (key - 49) / 12) * 440
+        }
+
+        waveArray[i] = freq
+    }
+
+    osc.frequency.setValueCurveAtTime(waveArray, audioCtx.currentTime, duration)
 
     osc.connect(gain)
     gain.connect(audioCtx.destination)
 
+    // Play the source
+    osc.start(audioCtx.currentTime)
+    osc.stop(audioCtx.currentTime + duration)
+
+    // Change the state that we're not playing anymore
     setTimeout(function() {
         setState({ isPlaying: false })
     }, duration * 1000)
@@ -147,7 +166,7 @@ function playSound() {
 document.addEventListener("keydown", function(e) {
     if (e.keyCode === 32) {
         if (!state.isPlaying) {
-            playSound()
+            playSound(fn)
         }
     } else if (e.keyCode === 37) {
         setState({
