@@ -1,0 +1,21 @@
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+main {
+    width: 600px;
+    height: 600px;
+    margin: 0;
+    border: 1px solid #000;
+}
+
+#canvas {
+    width: 600px;
+    height: 600px;
+}
+
+.hidden {
+    display: none;
+}
