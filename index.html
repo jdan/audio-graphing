@@ -5,8 +5,21 @@
 </head>
 <body>
     <main>
+        <h1>Question <span id="question"></span></h1>
+
         <!-- @2x for retina -->
         <canvas class="hidden" width="1200" height="1200" id="canvas"></canvas>
+
+        <div id="choices">
+            <button class="choice" id="choice-1"></button>
+            <button class="choice" id="choice-2"></button>
+            <button class="choice" id="choice-3"></button>
+            <button class="choice" id="choice-4"></button>
+        </div>
+
+        <audio id="sound">
+            <source src="question-correct.ogg" type="audio/ogg">
+        </audio>
     </main>
 
     <div class="controls">

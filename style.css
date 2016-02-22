@@ -17,6 +17,30 @@ main {
     border: 1px solid #000;
 }
 
+.choice {
+    display: block;
+    border: 3px solid #11accd;
+    width: 100%;
+    text-align: left;
+    font-size: 24;
+    background: none;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 8px;
+    background: #fff;
+    transition: background 500ms ease-in-out;
+}
+
+.error {
+    background: rgb(190, 40, 50);
+    transition: none;
+}
+
+.success {
+    background: rgb(40, 190, 50);
+    transition: none;
+}
+
 .controls {
     width: 180px;
     position: absolute;

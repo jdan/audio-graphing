@@ -33,6 +33,31 @@ function translatePoint(x, y) {
     }
 }
 
+const state = {
+    cursorEnabled: true,
+    cursorDelta: 0.25,
+
+    // Find something on screen?
+    cursorX: 0,
+
+    isPlaying: false,
+
+    volume: 0.2,
+    speed: 1,
+
+    currentQuestionIndex: 0,
+}
+
+function setState(newState) {
+    for (let key in newState) {
+        if (newState.hasOwnProperty(key)) {
+            state[key] = newState[key]
+        }
+    }
+
+    draw()
+}
+
 const fns = [
     ["f(x) = x", (x) => x],
     ["f(x) = x^2/10", (x) => x*x/10],
@@ -40,21 +65,82 @@ const fns = [
     ["f(x) = |x|", (x) => Math.abs(x)],
     ["f(x) = 5*sin(x)", (x) => 5*Math.sin(x)],
     ["f(x) = tan(x/2)", (x) => Math.tan(x/2)],
-];
+]
 
 const questions = [
     {
-        answer: ["y = x^2/10", (x) => x*x/10],
+        correctIndex: 0,
         choices: [
-            "y = 5x + 3",
-            "y = 2x - 3",
-            "y = x",
+            ["y = x^2/10", (x) => x*x/10],
+            ["y = 5x + 3"],
+            ["y = 2x - 3"],
+            ["y = x"],
+        ],
+    },
+
+    {
+        correctIndex: 0,
+        choices: [
+            ["y = -x^2/15", (x) => -x*x/15],
+            ["y = x^2/15"],
+            ["y = x^2/8 + 5"],
+            ["y = 5x + 8"],
         ],
     },
 ]
 
+// Scramble ze questions!
+
+// Wire up buttons
+for (let i = 1; i <= 4; i++) {
+    const button = document.getElementById("choice-" + i)
+    const question = questions[state.currentQuestionIndex]
+
+    const callback = (i, question, button) => {
+        return (e) => {
+            e.preventDefault()
+
+            // Wow these are awful
+            if (i - 1 === question.correctIndex) {
+                // You got it right!
+                document.getElementById("sound").play()
+
+                button.classList.add("success")
+                setTimeout(() => {
+                    button.classList.remove("success")
+                }, 16)
+
+                setTimeout(() => {
+                    const newIndex = state.currentQuestionIndex + 1
+                    setState({
+                        currentQuestionIndex: newIndex % questions.length,
+                    })
+                }, 600)
+            } else {
+                // Not right yet
+
+                button.classList.add("error")
+                setTimeout(() => {
+                    button.classList.remove("error")
+                }, 16)
+            }
+        }
+    }
+
+    button.addEventListener("click", callback(i, question, button))
+}
+
+function renderQuestion() {
+    const question = questions[state.currentQuestionIndex]
+    for (let i = 1; i <= 4; i++) {
+        document.getElementById("choice-" + i).innerText =
+            question.choices[i-1][0]
+    }
+}
+
 function currentFn(x) {
-    return questions[state.currentQuestionIndex].answer[1](x)
+    const question = questions[state.currentQuestionIndex]
+    return question.choices[question.correctIndex][1](x)
 }
 
 function drawVerticalGrid() {
@@ -122,7 +208,9 @@ function drawEquation() {
 }
 
 function drawCursor() {
-    const cursorCenter = translatePoint(state.cursorX, currentFn(state.cursorX))
+    const cursorCenter = translatePoint(
+        state.cursorX, currentFn(state.cursorX))
+
     ctx.save()
     ctx.fillStyle = "#06b5ff"
     ctx.beginPath()
@@ -131,31 +219,6 @@ function drawCursor() {
     ctx.closePath()
     ctx.fill()
     ctx.restore()
-}
-
-const state = {
-    cursorEnabled: true,
-    cursorDelta: 0.25,
-
-    // Find something on screen?
-    cursorX: 0,
-
-    isPlaying: false,
-
-    volume: 0.2,
-    speed: 1,
-
-    currentQuestionIndex: 0,
-}
-
-function setState(newState) {
-    for (let key in newState) {
-        if (newState.hasOwnProperty(key)) {
-            state[key] = newState[key]
-        }
-    }
-
-    draw()
 }
 
 function duration() {
@@ -304,6 +367,11 @@ function draw() {
     drawYAxis()
     drawEquation()
     drawCursor()
+
+    document.getElementById("question").innerText =
+        state.currentQuestionIndex + 1
+
+    renderQuestion()
 }
 
 draw()
