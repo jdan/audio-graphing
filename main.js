@@ -42,24 +42,20 @@ const fns = [
     ["f(x) = tan(x/2)", (x) => Math.tan(x/2)],
 ];
 
+const questions = [
+    {
+        answer: ["y = x^2/10", (x) => x*x/10],
+        choices: [
+            "y = 5x + 3",
+            "y = 2x - 3",
+            "y = x",
+        ],
+    },
+]
+
 function currentFn(x) {
-    return fns[state.currentFnIndex][1](x)
+    return questions[state.currentQuestionIndex].answer[1](x)
 }
-
-const functionSelect = document.getElementById("function")
-for (let i = 0; i < fns.length; i++) {
-    const option = document.createElement("option")
-    option.value = i
-    option.innerHTML = fns[i][0]
-
-    functionSelect.appendChild(option)
-}
-
-functionSelect.addEventListener("change", (e) => {
-    setState({
-        currentFnIndex: +e.target.value,
-    })
-})
 
 function drawVerticalGrid() {
     for (let i = X_MIN; i <= X_MAX; i += GRID_SIZE) {
@@ -138,6 +134,7 @@ function drawCursor() {
 }
 
 const state = {
+    cursorEnabled: true,
     cursorDelta: 0.25,
 
     // Find something on screen?
@@ -148,7 +145,7 @@ const state = {
     volume: 0.2,
     speed: 1,
 
-    currentFnIndex: 0,
+    currentQuestionIndex: 0,
 }
 
 function setState(newState) {
@@ -307,8 +304,6 @@ function draw() {
     drawYAxis()
     drawEquation()
     drawCursor()
-
-    document.getElementById("speed").innerText = state.speed
 }
 
 draw()
