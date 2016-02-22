@@ -125,6 +125,18 @@ function drawEquation() {
     ctx.restore()
 }
 
+function drawCursor() {
+    const cursorCenter = translatePoint(state.cursorX, currentFn(state.cursorX))
+    ctx.save()
+    ctx.fillStyle = "#06b5ff"
+    ctx.beginPath()
+    ctx.arc(
+        cursorCenter.x, cursorCenter.y, CURSOR_WIDTH, 0, Math.PI*2, true)
+    ctx.closePath()
+    ctx.fill()
+    ctx.restore()
+}
+
 const state = {
     cursorDelta: 0.25,
 
@@ -288,22 +300,13 @@ function round(v) {
 }
 
 function draw() {
-    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
     drawHorizontalGrid()
     drawVerticalGrid()
     drawXAxis()
     drawYAxis()
     drawEquation()
-
-    const cursorCenter = translatePoint(state.cursorX, currentFn(state.cursorX))
-    ctx.save()
-    ctx.fillStyle = "#06b5ff"
-    ctx.beginPath()
-    ctx.arc(
-        cursorCenter.x, cursorCenter.y, CURSOR_WIDTH, 0, Math.PI*2, true)
-    ctx.closePath()
-    ctx.fill()
-    ctx.restore()
+    drawCursor()
 
     document.getElementById("speed").innerText = state.speed
 }
