@@ -24,10 +24,6 @@ const X_MIN = -10
 const X_MAX = 10
 const GRID_SIZE = 1
 
-const cursorInfoDisplay = document.getElementById("cursor-info")
-const cursorXDisplay = document.getElementById("cursor-x")
-const cursorYDisplay = document.getElementById("cursor-y")
-
 const CURSOR_WIDTH = 15
 
 function translatePoint(x, y) {
@@ -130,7 +126,6 @@ function drawEquation() {
 }
 
 const state = {
-    cursorEnabled: true,
     cursorDelta: 0.25,
 
     // Find something on screen?
@@ -300,24 +295,15 @@ function draw() {
     drawYAxis()
     drawEquation()
 
-    if (state.cursorEnabled) {
-        const cursorCenter = translatePoint(state.cursorX, currentFn(state.cursorX))
-        ctx.save()
-        ctx.fillStyle = "#06b5ff"
-        ctx.beginPath()
-        ctx.arc(
-            cursorCenter.x, cursorCenter.y, CURSOR_WIDTH, 0, Math.PI*2, true)
-        ctx.closePath()
-        ctx.fill()
-        ctx.restore()
-
-        cursorXDisplay.innerText = round(state.cursorX)
-        cursorYDisplay.innerText = round(currentFn(state.cursorX))
-
-        cursorInfoDisplay.classList.remove("hidden")
-    } else {
-        cursorInfoDisplay.classList.add("hidden")
-    }
+    const cursorCenter = translatePoint(state.cursorX, currentFn(state.cursorX))
+    ctx.save()
+    ctx.fillStyle = "#06b5ff"
+    ctx.beginPath()
+    ctx.arc(
+        cursorCenter.x, cursorCenter.y, CURSOR_WIDTH, 0, Math.PI*2, true)
+    ctx.closePath()
+    ctx.fill()
+    ctx.restore()
 
     document.getElementById("speed").innerText = state.speed
 }
