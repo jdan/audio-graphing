@@ -23,7 +23,7 @@ main {
     top: 20px;
     right: 20px;
     border: 3px solid #000;
-    padding: 15px 20px;
+    padding: 5px 20px;
 }
 
 .control {
@@ -31,11 +31,20 @@ main {
 }
 
 .key {
+    display: inline-block;
     padding: 5px 8px;
     background-color: #ddd;
     font-family: monospace;
     margin-right: 15px;
     border-radius: 3px;
+}
+
+.left {
+    transform: scaleX(-1);
+}
+
+.up {
+    transform: scaleY(-1);
 }
 
 .hidden {

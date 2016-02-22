@@ -2,6 +2,10 @@
 
 const canvas = document.getElementById("canvas")
 const ctx = canvas.getContext("2d")
+const voice = new SpeechSynthesisUtterance()
+const DEFAULT_RATE = 2
+
+voice.rate = DEFAULT_RATE
 
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
@@ -154,12 +158,28 @@ function duration() {
     return (X_MAX - X_MIN) / (state.speed * 8)
 }
 
-function playSound() {
-    if (state.isPlaying) {
-        osc.stop(audioCtx.currentTime)
+function yToFreq(y) {
+    const KEYS = 88
 
-        // Clear the timeout so we don't accidentally claim we're not playing
-        clearTimeout(timeout)
+    // Map to a key
+    const key = (y - Y_MIN) / (Y_MAX - Y_MIN) * KEYS + 1
+
+    if (key > KEYS) {
+        return 0
+    } else {
+        return Math.pow(2, (key - 49) / 12) * 440
+    }
+}
+
+function stopSound() {
+    osc.stop(audioCtx.currentTime)
+    // Clear the timeout so we don't accidentally claim we're not playing
+    clearTimeout(timeout)
+}
+
+function playGraph() {
+    if (state.isPlaying) {
+        stopSound()
     }
 
     setState({ isPlaying: true })
@@ -168,22 +188,12 @@ function playSound() {
     const gain = audioCtx.createGain()
     gain.gain.value = state.volume
 
-    const KEYS = 88
     for (let x = X_MIN; x <= X_MAX; x += TONE_DELTA) {
-        const value = currentFn(x)
-
-        // Map to a key
-        const key = (value - Y_MIN) / (Y_MAX - Y_MIN) * KEYS + 1
-
-        let freq;
-        if (key > KEYS) {
-            freq = 0
-        } else {
-            freq = Math.pow(2, (key - 49) / 12) * 440
-        }
-
         const time = (x - X_MIN) / (X_MAX - X_MIN) * duration()
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + time)
+
+        osc.frequency.setValueAtTime(
+            yToFreq(currentFn(x)),
+            audioCtx.currentTime + time)
     }
 
     osc.connect(gain)
@@ -199,26 +209,65 @@ function playSound() {
     }, duration() * 1000)
 }
 
-document.addEventListener("keydown", function(e) {
-    console.log(e.keyCode)
+function playSound(x) {
+    if (state.isPlaying) {
+        stopSound()
+    }
 
+    osc = audioCtx.createOscillator()
+
+    const gain = audioCtx.createGain()
+    gain.gain.value = state.volume
+
+    osc.frequency.value = yToFreq(currentFn(x))
+
+    osc.connect(gain)
+    gain.connect(audioCtx.destination)
+
+    osc.start(audioCtx.currentTime)
+    osc.stop(audioCtx.currentTime + 0.1)
+}
+
+function announceCoords(slow) {
+    if (slow) {
+        voice.rate = 1
+    }
+
+    speechSynthesis.cancel()
+    voice.text = round(state.cursorX) + " " + round(currentFn(state.cursorX))
+    speechSynthesis.speak(voice)
+    voice.rate = DEFAULT_RATE
+}
+
+document.addEventListener("keydown", function(e) {
     // P
     if (e.keyCode === 80) {
-        playSound()
+        playGraph()
     }
 
     // Left
     if (e.keyCode === 37) {
-        setState({
-            cursorX: state.cursorX - state.cursorDelta,
-        })
+        const newCursorX = state.cursorX - state.cursorDelta
+        setState({ cursorX: newCursorX })
+        playSound(newCursorX)
+        announceCoords()
     }
 
     // Right
     if (e.keyCode === 39) {
-        setState({
-            cursorX: state.cursorX + state.cursorDelta,
-        })
+        const newCursorX = state.cursorX + state.cursorDelta
+        setState({ cursorX: newCursorX })
+        playSound(newCursorX)
+        announceCoords()
+    }
+
+    if (e.keyCode === 38) {
+        announceCoords(true /* slow */)
+    }
+
+    // DOWN
+    if (e.keyCode === 40) {
+        playSound(state.cursorX)
     }
 
     // W
@@ -226,7 +275,7 @@ document.addEventListener("keydown", function(e) {
         setState({
             speed: state.speed * 2
         })
-        playSound()
+        playGraph()
     }
 
     // Q
@@ -234,9 +283,13 @@ document.addEventListener("keydown", function(e) {
         setState({
             speed: state.speed / 2
         })
-        playSound()
+        playGraph()
     }
 })
+
+function round(v) {
+    return Math.round(v * 1000) / 1000
+}
 
 function draw() {
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -257,8 +310,8 @@ function draw() {
         ctx.fill()
         ctx.restore()
 
-        cursorXDisplay.innerText = Math.round(state.cursorX * 1000) / 1000
-        cursorYDisplay.innerText = Math.round(currentFn(state.cursorX) * 1000) / 1000
+        cursorXDisplay.innerText = round(state.cursorX)
+        cursorYDisplay.innerText = round(currentFn(state.cursorX))
 
         cursorInfoDisplay.classList.remove("hidden")
     } else {
