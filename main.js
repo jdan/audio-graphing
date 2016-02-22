@@ -261,12 +261,13 @@ document.addEventListener("keydown", function(e) {
         announceCoords()
     }
 
-    if (e.keyCode === 38) {
+    // A
+    if (e.keyCode === 65) {
         announceCoords(true /* slow */)
     }
 
-    // DOWN
-    if (e.keyCode === 40) {
+    // S
+    if (e.keyCode === 83) {
         playSound(state.cursorX)
     }
 

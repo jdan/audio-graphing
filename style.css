@@ -43,10 +43,6 @@ main {
     transform: scaleX(-1);
 }
 
-.up {
-    transform: scaleY(-1);
-}
-
 .hidden {
     display: none;
 }
