@@ -69,7 +69,6 @@ const fns = [
 
 const questions = [
     {
-        correctIndex: 0,
         choices: [
             ["y = x^2/10", (x) => x*x/10],
             ["y = 5x + 3"],
@@ -79,12 +78,40 @@ const questions = [
     },
 
     {
-        correctIndex: 0,
         choices: [
             ["y = -x^2/15", (x) => -x*x/15],
             ["y = x^2/15"],
             ["y = x^2/8 + 5"],
             ["y = 5x + 8"],
+        ],
+    },
+
+    {
+        choices: [
+            ["y = x", (x) => x],
+            ["y = -x"],
+            ["y = x^2"],
+            ["y = -x^2"],
+        ],
+    },
+
+    // Require the use of scrubbing!
+    {
+        choices: [
+            ["y = x/2", (x) => x/2],
+            ["y = x"],
+            ["y = x/3"],
+            ["y = 2x"],
+        ],
+    },
+
+    // Require the use of scrubbing!
+    {
+        choices: [
+            ["y = x^2/10", (x) => x*x/10],
+            ["y = x^2"],
+            ["y = 2x^2"],
+            ["y = x^4"],
         ],
     },
 ]
@@ -323,7 +350,7 @@ function announceCoords(slow) {
     }
 
     speechSynthesis.cancel()
-    voice.text = round(state.cursorX) + " " + round(currentFn(state.cursorX))
+    voice.text = round(state.cursorX) + "; " + round(currentFn(state.cursorX))
     speechSynthesis.speak(voice)
     voice.rate = DEFAULT_RATE
 }
