@@ -89,45 +89,65 @@ const questions = [
     },
 ]
 
+const buttonHandlers = []
+
 // Scramble ze questions!
+questions.forEach((question) => {
+    const choices = question.choices.slice(1)
+    const shuffled = _.shuffle(choices)
 
-// Wire up buttons
-for (let i = 1; i <= 4; i++) {
-    const button = document.getElementById("choice-" + i)
-    const question = questions[state.currentQuestionIndex]
+    const insertIndex = Math.floor(Math.random() * (choices.length + 1))
+    choices.splice(insertIndex, 0, question.choices[0])
 
-    const callback = (i, question, button) => {
-        return (e) => {
-            e.preventDefault()
+    question.choices = choices
+    question.correctIndex = insertIndex
+})
 
-            // Wow these are awful
-            if (i - 1 === question.correctIndex) {
-                // You got it right!
-                document.getElementById("sound").play()
+function wireButtons() {
+    for (let i = 1; i <= 4; i++) {
+        const button = document.getElementById("choice-" + i)
+        const question = questions[state.currentQuestionIndex]
 
-                button.classList.add("success")
-                setTimeout(() => {
-                    button.classList.remove("success")
-                }, 16)
+        if (buttonHandlers[i-1]) {
+            button.removeEventListener("click", buttonHandlers[i-1])
+        }
 
-                setTimeout(() => {
-                    const newIndex = state.currentQuestionIndex + 1
-                    setState({
-                        currentQuestionIndex: newIndex % questions.length,
-                    })
-                }, 600)
-            } else {
-                // Not right yet
+        const buildHandler = (i, question, button) => {
+            return (e) => {
+                e.preventDefault()
 
-                button.classList.add("error")
-                setTimeout(() => {
-                    button.classList.remove("error")
-                }, 16)
+                // Wow these are awful
+                if (i - 1 === question.correctIndex) {
+                    // You got it right!
+                    document.getElementById("sound").play()
+
+                    button.classList.add("success")
+                    setTimeout(() => {
+                        button.classList.remove("success")
+                    }, 16)
+
+                    setTimeout(() => {
+                        const newIndex = state.currentQuestionIndex + 1
+                        setState({
+                            currentQuestionIndex: newIndex % questions.length,
+                        })
+                    }, 600)
+                } else {
+                    // Not right yet
+
+                    button.classList.add("error")
+                    setTimeout(() => {
+                        button.classList.remove("error")
+                    }, 16)
+                }
             }
         }
-    }
 
-    button.addEventListener("click", callback(i, question, button))
+        const handler = buildHandler(i, question, button)
+
+        buttonHandlers[i-1] = handler
+        button.addEventListener("click", handler)
+    }
 }
 
 function renderQuestion() {
@@ -136,6 +156,8 @@ function renderQuestion() {
         document.getElementById("choice-" + i).innerText =
             question.choices[i-1][0]
     }
+
+    wireButtons()
 }
 
 function currentFn(x) {
