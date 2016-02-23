@@ -46,6 +46,8 @@ const state = {
     speed: 1,
 
     currentQuestionIndex: 0,
+
+    graphVisible: false,
 }
 
 function setState(newState) {
@@ -105,13 +107,21 @@ const questions = [
         ],
     },
 
-    // Require the use of scrubbing!
     {
         choices: [
-            ["y = \\frac{x^2}{10}", (x) => x*x/10],
-            ["y = x^2"],
-            ["y = 2x^2"],
-            ["y = x^4"],
+            ["y = \\frac{x^3 - 21x + 20}{20}", (x) => (x*x*x - 21*x + 20)/20],
+            ["y = \\frac{2x^4}{14}"],
+            ["y = \\frac{2}{x + 7}"],
+            ["y = x^3"],
+        ],
+    },
+
+    {
+        choices: [
+            ["y = \\frac{-x^3 + 21x + 20}{20}", (x) => (-x*x*x + 21*x + 20)/20],
+            ["y = \\frac{x^3 - 21x + 20}{20}"],
+            ["y = x^2 - 3x + 4"],
+            ["y = x^3"],
         ],
     },
 
@@ -421,6 +431,12 @@ document.addEventListener("keydown", function(e) {
         playSound(state.cursorX)
     }
 
+    if (e.keyCode === 84) {
+        setState({
+            graphVisible: !state.graphVisible,
+        })
+    }
+
     // W
     if (e.keyCode === 87) {
         setState({
@@ -455,6 +471,12 @@ function draw() {
         state.currentQuestionIndex + 1
 
     renderQuestion()
+
+    if (state.graphVisible) {
+        document.getElementById("canvas").classList.remove("hidden")
+    } else {
+        document.getElementById("canvas").classList.add("hidden")
+    }
 }
 
 draw()
