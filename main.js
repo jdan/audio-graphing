@@ -223,7 +223,15 @@ function renderQuestion() {
     const question = questions[state.currentQuestionIndex]
     for (let i = 1; i <= 4; i++) {
         const button = document.getElementById("choice-" + i)
-        katex.render(question.choices[i-1][0], button);
+        const latex = question.choices[i-1][0]
+
+        katex.render(latex, button)
+
+        const a11yText = document.createElement("div")
+        a11yText.classList.add("sr-only")
+        button.appendChild(a11yText)
+
+        katexA11yRender(question.choices[i-1][0], a11yText)
     }
 
     wireButtons()
