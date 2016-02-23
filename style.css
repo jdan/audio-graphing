@@ -1,6 +1,5 @@
 body {
     display: flex;
-    align-items: center;
     justify-content: center;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
@@ -22,7 +21,7 @@ main {
     border: 3px solid #11accd;
     width: 100%;
     text-align: left;
-    font-size: 24;
+    font-size: 24px;
     background: none;
     margin-bottom: 15px;
     padding: 10px;

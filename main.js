@@ -60,7 +60,7 @@ function setState(newState) {
 
 const fns = [
     ["f(x) = x", (x) => x],
-    ["f(x) = x^2/10", (x) => x*x/10],
+    ["f(x) = \frac{x^2}{10}", (x) => x*x/10],
     ["f(x) = x^3/12 - 31x/12 + 5/2", (x) => x*x*x/12 - 31*x/12 + 5/2],
     ["f(x) = |x|", (x) => Math.abs(x)],
     ["f(x) = 5*sin(x)", (x) => 5*Math.sin(x)],
@@ -70,7 +70,7 @@ const fns = [
 const questions = [
     {
         choices: [
-            ["y = x^2/10", (x) => x*x/10],
+            ["y = \\frac{x^2}{10}", (x) => x*x/10],
             ["y = 5x + 3"],
             ["y = 2x - 3"],
             ["y = x"],
@@ -79,9 +79,9 @@ const questions = [
 
     {
         choices: [
-            ["y = -x^2/15", (x) => -x*x/15],
-            ["y = x^2/15"],
-            ["y = x^2/8 + 5"],
+            ["y = -\\frac{x^2}{15}", (x) => -x*x/15],
+            ["y = \\frac{x^2}{15}"],
+            ["y = \\frac{x^2}{8} + 5"],
             ["y = 5x + 8"],
         ],
     },
@@ -98,9 +98,9 @@ const questions = [
     // Require the use of scrubbing!
     {
         choices: [
-            ["y = x/2", (x) => x/2],
+            ["y = \\frac{x}{2}", (x) => x/2],
             ["y = x"],
-            ["y = x/3"],
+            ["y = \\frac{x}{3}"],
             ["y = 2x"],
         ],
     },
@@ -108,10 +108,39 @@ const questions = [
     // Require the use of scrubbing!
     {
         choices: [
-            ["y = x^2/10", (x) => x*x/10],
+            ["y = \\frac{x^2}{10}", (x) => x*x/10],
             ["y = x^2"],
             ["y = 2x^2"],
             ["y = x^4"],
+        ],
+    },
+
+    {
+        choices: [
+            ["y = 5sin(x)", (x) => 5*Math.sin(x)],
+            ["y = x^3"],
+            ["y = tan(x)"],
+            ["y = x^4"],
+        ],
+    },
+
+    // Requires scrubber!
+    {
+        choices: [
+            ["y = 3sin(x)", (x) => 3*Math.sin(x)],
+            ["y = sin(x)"],
+            ["y = 5sin(x)"],
+            ["y = 9sin(x)"],
+        ],
+    },
+
+    // Requires scrubber!
+    {
+        choices: [
+            ["y = 5cos(x)", (x) => 5*Math.cos(x)],
+            ["y = sin(x)"],
+            ["y = 5sin(x)"],
+            ["y = 9sin(x)"],
         ],
     },
 ]
@@ -157,6 +186,7 @@ function wireButtons() {
                         const newIndex = state.currentQuestionIndex + 1
                         setState({
                             currentQuestionIndex: newIndex % questions.length,
+                            cursorX: 0,
                         })
                     }, 600)
                 } else {
@@ -180,8 +210,8 @@ function wireButtons() {
 function renderQuestion() {
     const question = questions[state.currentQuestionIndex]
     for (let i = 1; i <= 4; i++) {
-        document.getElementById("choice-" + i).innerText =
-            question.choices[i-1][0]
+        const button = document.getElementById("choice-" + i)
+        katex.render(question.choices[i-1][0], button);
     }
 
     wireButtons()
@@ -356,6 +386,10 @@ function announceCoords(slow) {
 }
 
 document.addEventListener("keydown", function(e) {
+    if (e.keyCode >= 49 && e.keyCode <= 57) {
+        setState({ currentQuestionIndex: e.keyCode - 49 })
+    }
+
     // P
     if (e.keyCode === 80) {
         playGraph()
