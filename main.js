@@ -9,7 +9,9 @@ voice.rate = DEFAULT_RATE
 
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const audioCtx = new AudioContext();
-let osc = audioCtx.createOscillator();
+
+// Audio globals
+let fadeOut = audioCtx.createGain();
 let timeout = null;
 
 const DELTA = 0.01
@@ -328,7 +330,8 @@ function yToFreq(y) {
 }
 
 function stopSound() {
-    osc.stop(audioCtx.currentTime)
+    // Fade out the sound
+    fadeOut.gain.setTargetAtTime(0, audioCtx.currentTime + 0.1, 0.01)
     // Clear the timeout so we don't accidentally claim we're not playing
     clearTimeout(timeout)
 }
@@ -340,9 +343,13 @@ function playGraph() {
 
     setState({ isPlaying: true })
 
-    osc = audioCtx.createOscillator()
+    const osc = audioCtx.createOscillator()
     const gain = audioCtx.createGain()
     gain.gain.value = state.volume
+
+    // Fade out
+    fadeOut = audioCtx.createGain()
+    fadeOut.gain.setTargetAtTime(0, audioCtx.currentTime + duration() - 0.1, 0.01)
 
     for (let x = X_MIN; x <= X_MAX; x += TONE_DELTA) {
         const time = (x - X_MIN) / (X_MAX - X_MIN) * duration()
@@ -353,7 +360,8 @@ function playGraph() {
     }
 
     osc.connect(gain)
-    gain.connect(audioCtx.destination)
+    gain.connect(fadeOut)
+    fadeOut.connect(audioCtx.destination)
 
     // Play the source
     osc.start(audioCtx.currentTime)
@@ -370,18 +378,23 @@ function playSound(x) {
         stopSound()
     }
 
-    osc = audioCtx.createOscillator()
+    const duration = 0.1
 
+    const osc = audioCtx.createOscillator()
     const gain = audioCtx.createGain()
     gain.gain.value = state.volume
+
+    fadeOut = audioCtx.createGain()
+    fadeOut.gain.setTargetAtTime(0, audioCtx.currentTime + duration / 2, 0.02)
 
     osc.frequency.value = yToFreq(currentFn(x))
 
     osc.connect(gain)
-    gain.connect(audioCtx.destination)
+    gain.connect(fadeOut)
+    fadeOut.connect(audioCtx.destination)
 
     osc.start(audioCtx.currentTime)
-    osc.stop(audioCtx.currentTime + 0.1)
+    osc.stop(audioCtx.currentTime + duration)
 }
 
 function announceCoords(slow) {
