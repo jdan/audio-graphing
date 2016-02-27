@@ -45,7 +45,7 @@ var state = {
 
     isPlaying: false,
 
-    volume: 0.2,
+    volume: 0.12,
     speed: 1,
 
     currentQuestionIndex: 0,
